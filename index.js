@@ -45,6 +45,19 @@ async function run(){
           const result = await servicesCollection.findOne(query);
           res.send(result);
       })
+      //manage products
+      app.delete('/services/:id', async(req, res) =>{
+          const id = req.params.id;
+          const query = {_id: ObjectId(id)};
+          const result = await servicesCollection.deleteOne(query);
+          res.send(result)
+      })
+      //add product
+      app.post('/services', async(req, res) => {
+          const query = req.body;
+          const result = await servicesCollection.insertOne(query);
+          res.send(result);
+      })
 
       // users role
       app.get('/users', async(req, res) => {
@@ -86,6 +99,7 @@ async function run(){
           const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, {expiresIn: '1h'});
           res.send({result, token});
       })
+
       //review
       app.post('/reviews', async(req, res) => {
           const query = req.body;
