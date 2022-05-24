@@ -4,6 +4,8 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 const port = process.env.PORT || 5000;
 const app = express();
 app.use(cors());
@@ -34,6 +36,19 @@ async function run(){
       const usersCollection = client.db('ManufactureData').collection('users');
       const ordersCollection = client.db('ManufactureData').collection('orders');
       const reviewCollection = client.db('ManufactureData').collection('reviews');
+
+      app.post("/create-payment-intent", async (req, res) => {
+        const { amount } = req.body;
+        const totalAmount = amount * 100;
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: totalAmount,
+            currency: "usd",
+            "payment_method_types": [
+                "card"
+              ],
+          });
+          res.send({clientSecret: paymentIntent.client_secret,});
+      })
 
       app.get('/services', async(req, res) => {
           const query = req.query;
@@ -69,7 +84,19 @@ async function run(){
          const result = await ordersCollection.find().toArray()
          res.send(result)
      })
-
+     //find orders for single user
+     app.get('/order', async(req, res) => {
+         const email = req.query.email;
+         const query = {email : email};
+         const result = await ordersCollection.find(query).toArray();
+         res.send(result);
+     })
+     app.get('/orders/:id', async(req, res) => {
+         const id = req.params.id;
+         const query = {_id: ObjectId(id)};
+         const result = await ordersCollection.findOne(query);
+         res.send(result);
+     })
       // users role
       app.get('/users', async(req, res) => {
           const result = await usersCollection.find().toArray();
