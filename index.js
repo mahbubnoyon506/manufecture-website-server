@@ -12,12 +12,12 @@ app.use(express.json());
 function jwtVerify(req, res, next){
     const authHeaders = req.headers.authorization;
     if(!authHeaders){
-        return req.status(401).send({message: 'Unauthorized access'})
+        return res.status(401).send({message: 'Unauthorized access'})
     }
     const token = authHeaders.split(' ')[1]
     jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
         if(err){
-            return req.status(403).send({message: 'Forbidden access'})
+            return res.status(403).send({message: 'Forbidden access'})
         }
         req.decoded = decoded;
         next()
@@ -32,6 +32,7 @@ async function run(){
       await client.connect();
       const servicesCollection = client.db('ManufactureData').collection('services');
       const usersCollection = client.db('ManufactureData').collection('users');
+      const ordersCollection = client.db('ManufactureData').collection('orders');
       const reviewCollection = client.db('ManufactureData').collection('reviews');
 
       app.get('/services', async(req, res) => {
@@ -58,6 +59,16 @@ async function run(){
           const result = await servicesCollection.insertOne(query);
           res.send(result);
       })
+      // orders
+      app.post('/orders', async(req, res) => {
+          const query = req.body;
+          const result = await ordersCollection.insertOne(query);
+          res.send(result)
+      })
+     app.get('/orders', async(req, res) => {
+         const result = await ordersCollection.find().toArray()
+         res.send(result)
+     })
 
       // users role
       app.get('/users', async(req, res) => {
