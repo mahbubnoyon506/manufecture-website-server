@@ -36,6 +36,7 @@ async function run(){
       const usersCollection = client.db('ManufactureData').collection('users');
       const ordersCollection = client.db('ManufactureData').collection('orders');
       const reviewCollection = client.db('ManufactureData').collection('reviews');
+      const paymentsCollection = client.db('ManufactureData').collection('payments');
 
       app.post("/create-payment-intent", async (req, res) => {
         const { amount } = req.body;
@@ -96,6 +97,20 @@ async function run(){
          const query = {_id: ObjectId(id)};
          const result = await ordersCollection.findOne(query);
          res.send(result);
+     })
+     app.patch('/orders/:id', async(req, res) => {
+         const id = req.params.id;
+         const payment = req.body;
+         const filter = {_id: ObjectId(id)};
+         const updateDoc = {
+             $set : {
+                 paid: true,
+                 trasectionId: payment.transectionId
+             }
+         }
+         const result = await paymentsCollection.insertOne(payment);
+         const updatedOrder = await ordersCollection.updateOne(filter, updateDoc);
+         res.send(updateDoc)
      })
       // users role
       app.get('/users', async(req, res) => {
