@@ -151,6 +151,34 @@ async function run() {
             const result = await usersCollection.find().toArray();
             res.send(result);
         })
+        //find per user
+        app.get('/user', async(req, res) => {
+            const email = req.query.email;
+            const query = {email: email};
+            const result = await usersCollection.findOne(query);
+            res.send(result)
+        })
+       // update user field
+       app.put('/users/:email', async(req, res) => {
+           const email = req.params.email;
+           const data = req.body;
+           const filter = {email : email};
+           const options = {upsert: true};
+           const updateDoc = {
+               $set: {
+                profession: data.profession,
+                address: {
+                    city:data.address.city,
+                    state : data.address.state,
+                    country: data.address.country
+                },
+                phone: data.phone,
+                image: data.photo
+               }
+           }
+           const result = await usersCollection.updateOne(filter, updateDoc, options);
+           res.send(result);
+       })
         app.put('/users/admin/:email', jwtVerify, async (req, res) => {
             const email = req.params.email;
             const requester = req.decoded.email;
@@ -166,14 +194,23 @@ async function run() {
                 return res.status(403).send({ message: 'Fobidden access' })
             }
 
-            app.get('/admin/:email', async (req, res) => {
-                const email = req.params.email;
-                const user = await usersCollection.findOne({ email: email });
+            // app.get('/admin/:email', async (req, res) => {
+            //     const email = req.params.email;
+            //     const user = await usersCollection.findOne({ email: email });
+            //     const isAdmin = user.role === 'admin';
+            //     console.log(isAdmin)
+            //     res.send({ admin: isAdmin });
+            // })
+            //
+            app.get('/user', async (req, res) => {
+                const email = req.query.email;
+                const query = {email : email}
+                const user = await usersCollection.findOne(query);
                 const isAdmin = user.role === 'admin';
                 console.log(isAdmin)
                 res.send({ admin: isAdmin });
             })
-
+            //
         })
         app.put('/users/:email', async (req, res) => {
             const email = req.params.email;
