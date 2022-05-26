@@ -168,7 +168,7 @@ async function run() {
                $set: {
                 profession: data.profession,
                 address: {
-                    city:data.address.city,
+                    city: data.address.city,
                     state : data.address.state,
                     country: data.address.country
                 },
