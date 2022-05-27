@@ -4,11 +4,11 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
+const port = process.env.PORT || 5000;
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-const port = process.env.PORT || 5000;
 const app = express();
-app.use(cors());
+app.use(cors({origin:"*"}));
 app.use(express.json());
 
 function jwtVerify(req, res, next) {
