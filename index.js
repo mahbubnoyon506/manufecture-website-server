@@ -9,23 +9,8 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 
-// app.use(cors({origin:"*"}));
-// app.use(express.json());
-
-const corsConfig = {
-    origin: '*',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-    }
-    app.use(cors(corsConfig))
-    app.options("*", cors(corsConfig))
-    app.use(express.json())
-    app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,authorization")
-    next()
-    })
-
+app.use(cors());
+app.use(express.json());
 
 
 
@@ -43,6 +28,20 @@ function jwtVerify(req, res, next) {
         next()
     });
 }
+
+// const corsConfig = {
+//     origin: '*',
+//     credentials: true,
+//     methods: ['GET', 'POST', 'PUT', 'DELETE']
+//     }
+//     app.use(cors(corsConfig))
+//     app.options("*", cors(corsConfig))
+//     app.use(express.json())
+//     app.use(function (req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "*")
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,authorization")
+//     next()
+//     })
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ajd6g.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -113,7 +112,7 @@ async function run() {
             const result = await ordersCollection.insertOne(query);
             res.send(result)
         })
-        app.get('/orders', jwtVerify,  async (req, res) => {
+        app.get('/orders',  async (req, res) => {
             const result = await ordersCollection.find().toArray()
             res.send(result)
         })
@@ -197,7 +196,7 @@ async function run() {
            const result = await usersCollection.updateOne(filter, updateDoc, options);
            res.send(result);
        })
-        app.put('/users/admin/:email', jwtVerify, async (req, res) => {
+        app.put('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const requester = req.decoded.email;
             const requesteremail = await usersCollection.findOne({ email: requester });
@@ -244,7 +243,7 @@ async function run() {
         })
 
         //review
-        app.post('/reviews', jwtVerify, async (req, res) => {
+        app.post('/reviews', async (req, res) => {
             const query = req.body;
             const result = await reviewCollection.insertOne(query);
             res.send(result);
@@ -263,8 +262,8 @@ async function run() {
 run().catch(console.dir)
 
 app.get('/', (req, res) => {
-    res.send('Hello world')
+    res.send('manufacture is running')
 })
 app.listen(port, () => {
-    console.log('Server is listening with post', port);
+    console.log('Server is listening with port', port);
 })
