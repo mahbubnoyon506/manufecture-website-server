@@ -29,19 +29,6 @@ function jwtVerify(req, res, next) {
     });
 }
 
-// const corsConfig = {
-//     origin: '*',
-//     credentials: true,
-//     methods: ['GET', 'POST', 'PUT', 'DELETE']
-//     }
-//     app.use(cors(corsConfig))
-//     app.options("*", cors(corsConfig))
-//     app.use(express.json())
-//     app.use(function (req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*")
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,authorization")
-//     next()
-//     })
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ajd6g.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -54,6 +41,7 @@ async function run() {
         const ordersCollection = client.db('ManufactureData').collection('orders');
         const reviewCollection = client.db('ManufactureData').collection('reviews');
         const paymentsCollection = client.db('ManufactureData').collection('payments');
+        const profileCollection = client.db('ManufactureData').collection('profiles');
 
         app.post("/create-payment-intent", async (req, res) => {
             const { amount } = req.body;
@@ -94,14 +82,14 @@ async function run() {
             res.send(result)
         })
         //manage products
-        app.delete('/services/:id', async (req, res) => {
+        app.delete('/services/:id', jwtVerify, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await servicesCollection.deleteOne(query);
             res.send(result)
         })
         //add product
-        app.post('/services', async (req, res) => {
+        app.post('/services', jwtVerify, async (req, res) => {
             const query = req.body;
             const result = await servicesCollection.insertOne(query);
             res.send(result);
@@ -175,14 +163,22 @@ async function run() {
             const result = await usersCollection.findOne(query);
             res.send(result)
         })
-       // update user field
-       app.put('/users/:email', async(req, res) => {
+        app.get('/profiles', async(req, res) => {
+            const email = req.query.email;
+            const query = {email: email};
+            const result = await usersCollection.findOne(query);
+            res.send(result)
+        })
+    //    update user field
+       app.put('/profiles/:email', jwtVerify, async(req, res) => {
            const email = req.params.email;
            const data = req.body;
            const filter = {email : email};
            const options = {upsert: true};
            const updateDoc = {
                $set: {
+                name: data.name,
+                email: data.email,
                 profession: data.profession,
                 address: {
                     city: data.address.city,
@@ -193,10 +189,12 @@ async function run() {
                 image: data.photo
                }
            }
-           const result = await usersCollection.updateOne(filter, updateDoc, options);
+           const result = await profileCollection.updateOne(filter, updateDoc, options);
            res.send(result);
        })
-        app.put('/users/admin/:email', async (req, res) => {
+
+
+        app.put('/users/admin/:email', jwtVerify, async (req, res) => {
             const email = req.params.email;
             const requester = req.decoded.email;
             const requesteremail = await usersCollection.findOne({ email: requester });
