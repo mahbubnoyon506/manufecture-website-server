@@ -167,7 +167,12 @@ async function run() {
         app.get('/profiles', async(req, res) => {
             const email = req.query.email;
             const query = {email: email};
-            const result = await profileCollection.findOne(query);
+            const result = await profileCollection.findOne();
+            res.send(result)
+        })
+        //get all profile by email
+        app.get('/profiles', async(req, res) => {
+            const result = await profileCollection.find().toArray();
             res.send(result)
         })
     //    update user field
@@ -187,7 +192,7 @@ async function run() {
                     country: data.address.country
                 },
                 phone: data.phone,
-                image: data.photo
+                image: data.image
                }
            }
            const result = await profileCollection.updateOne(filter, updateDoc, options);
