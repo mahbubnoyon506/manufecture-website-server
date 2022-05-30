@@ -163,10 +163,11 @@ async function run() {
             const result = await usersCollection.findOne(query);
             res.send(result)
         })
+        //get all profile by email
         app.get('/profiles', async(req, res) => {
             const email = req.query.email;
             const query = {email: email};
-            const result = await usersCollection.findOne(query);
+            const result = await profileCollection.findOne(query);
             res.send(result)
         })
     //    update user field
