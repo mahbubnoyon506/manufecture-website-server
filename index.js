@@ -192,7 +192,7 @@ async function run() {
                     country: data.address.country
                 },
                 phone: data.phone,
-                image: data.image
+                image: data.image,
                }
            }
            const result = await profileCollection.updateOne(filter, updateDoc, options);
