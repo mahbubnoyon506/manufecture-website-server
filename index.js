@@ -61,9 +61,8 @@ async function run() {
             const limit = Number(req.query.limit);
             const page = Number(req.query.pageNumber);
             const count = await servicesCollection.estimatedDocumentCount();
-            console.log(count)
             const result = await servicesCollection.find(query).skip(limit*page).limit(limit).toArray()
-            res.send({Success: true, data:result, count});
+            res.send({success: true, data:result, count});
         })
         app.get('/services/:id', jwtVerify, async (req, res) => {
             const id = req.params.id;
