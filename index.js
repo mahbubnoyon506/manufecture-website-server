@@ -42,6 +42,7 @@ async function run() {
         const reviewCollection = client.db('ManufactureData').collection('reviews');
         const paymentsCollection = client.db('ManufactureData').collection('payments');
         const profileCollection = client.db('ManufactureData').collection('profiles');
+        const productsCollection = client.db('Electro').collection('products');
 
         app.post("/create-payment-intent", async (req, res) => {
             const { amount } = req.body;
@@ -256,9 +257,16 @@ async function run() {
             res.send(result);
         })
         app.get('/reviews', async (req, res) => {
-            const result = await reviewCollection.find().toArray()
+            const result = await reviewCollection.find().toArray();
             res.send(result);
         })
+
+        // getting electro product
+        app.get('/products', async (req, res) => {
+            const result = await productsCollection.find().toArray();
+            res.send(result);
+        })
+
 
     }
     finally {
